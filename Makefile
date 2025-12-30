@@ -1,30 +1,34 @@
-# Makefile
+# Makefile - Auto-discovers bench_*.c files from subdirectories
+
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -std=c11 -D_POSIX_C_SOURCE=199309L -march=native
+CFLAGS = -O3 -Wall -Wextra -std=c11 -D_POSIX_C_SOURCE=199309L -march=native -I.
 LDFLAGS = -lrt -lpthread
 TARGET = bench
 
+BENCH_SRCS := $(wildcard */bench_*.c)
+BENCH_OBJS := $(BENCH_SRCS:.c=.o)
+
+MAIN_OBJ = main.o
+ALL_OBJS = $(MAIN_OBJ) $(BENCH_OBJS)
+
 all: $(TARGET)
 
-$(TARGET): main.o bench_sequential.o bench_random.o bench_pointer_chase.o bench_reduction.o
-	$(CC) $(CFLAGS) -o $(TARGET) main.o bench_sequential.o bench_random.o bench_pointer_chase.o bench_reduction.o $(LDFLAGS)
+$(TARGET): $(ALL_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(ALL_OBJS) $(LDFLAGS)
 
-main.o: main.c bench.h
-	$(CC) $(CFLAGS) -c main.c
+$(MAIN_OBJ): main.c bench.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
-bench_sequential.o: bench_sequential.c bench.h
-	$(CC) $(CFLAGS) -c bench_sequential.c
-
-bench_random.o: bench_random.c bench.h
-	$(CC) $(CFLAGS) -c bench_random.c
-
-bench_pointer_chase.o: bench_pointer_chase.c bench.h
-	$(CC) $(CFLAGS) -c bench_pointer_chase.c
-
-bench_reduction.o: bench_reduction.c bench.h
-	$(CC) $(CFLAGS) -c bench_reduction.c
+%/bench_%.o: %/bench_%.c bench.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) *.o
+	rm -f $(TARGET) $(MAIN_OBJ) $(BENCH_OBJS)
 
 .PHONY: all clean
+
+info:
+	@echo "Discovered benchmark sources:"
+	@echo "  $(BENCH_SRCS)"
+	@echo "Object files:"
+	@echo "  $(ALL_OBJS)"
