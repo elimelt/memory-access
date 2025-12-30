@@ -1,0 +1,27 @@
+# Build artifacts
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+
+# Executables
+bench
+*.exe
+*.out
+
+# Debug files
+*.dSYM/
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
