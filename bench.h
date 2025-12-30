@@ -19,8 +19,27 @@ static inline void Clobber(void) {
   __asm__ volatile("" : : : "memory");
 }
 
+// Benchmark function signature
+typedef BenchResult (*BenchFunc)(uint64_t *array, size_t n);
+
+// Benchmark registry entry
+typedef struct {
+  const char *cli_name;    // Command line name (e.g., "seq")
+  const char *description; // Help text description
+  BenchFunc func;          // Function pointer
+} BenchEntry;
+
+// Memory access benchmarks
 BenchResult BenchSequential(uint64_t *array, size_t n);
 BenchResult BenchRandom(uint64_t *array, size_t n);
 BenchResult BenchPointerChase(uint64_t *array, size_t n);
+
+// Reduction benchmarks (ILP demonstration)
+BenchResult BenchReductionNaive(uint64_t *array, size_t n);
+BenchResult BenchReductionILP(uint64_t *array, size_t n);
+BenchResult BenchReductionSimd(uint64_t *array, size_t n);
+BenchResult BenchReductionThread(uint64_t *array, size_t n);
+BenchResult BenchReductionILPSimd(uint64_t *array, size_t n);
+BenchResult BenchReductionAll(uint64_t *array, size_t n);
 
 #endif

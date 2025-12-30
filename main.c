@@ -4,12 +4,39 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Benchmark registry - add new benchmarks here
+static const BenchEntry kBenchmarks[] = {
+    // Memory access patterns
+    {"seq", "Sequential access", BenchSequential},
+    {"ran", "Random access (parallel loads)", BenchRandom},
+    {"chase", "Pointer chasing (serial loads)", BenchPointerChase},
+    // Reduction benchmarks (ILP demonstration)
+    {"red_naive", "Reduction naive (1 accumulator)", BenchReductionNaive},
+    {"red_ilp", "Reduction ILP (8 accumulators)", BenchReductionILP},
+    {"red_simd", "Reduction SIMD (AVX2/SSE2)", BenchReductionSimd},
+    {"red_thread", "Reduction threaded (8 threads)", BenchReductionThread},
+    {"red_ilp_simd", "Reduction ILP+SIMD combined", BenchReductionILPSimd},
+    {"red_all", "Reduction all (threads+ILP+SIMD)", BenchReductionAll},
+};
+
+static const size_t kNumBenchmarks = sizeof(kBenchmarks) / sizeof(kBenchmarks[0]);
+
+static const BenchEntry *FindBenchmark(const char *name) {
+  for (size_t i = 0; i < kNumBenchmarks; i++) {
+    if (strcmp(name, kBenchmarks[i].cli_name) == 0) {
+      return &kBenchmarks[i];
+    }
+  }
+  return NULL;
+}
+
 static void PrintUsage(const char *prog_name) {
   fprintf(stderr, "Usage: %s <benchmark_type> [array_size_mb]\n", prog_name);
-  fprintf(stderr, "Benchmark types:\n");
-  fprintf(stderr, "  seq    - Sequential access\n");
-  fprintf(stderr, "  ran    - Random access (parallel loads)\n");
-  fprintf(stderr, "  chase  - Pointer chasing (serial loads)\n");
+  fprintf(stderr, "\nBenchmark types:\n");
+  for (size_t i = 0; i < kNumBenchmarks; i++) {
+    fprintf(stderr, "  %-8s - %s\n", kBenchmarks[i].cli_name,
+            kBenchmarks[i].description);
+  }
   fprintf(stderr, "\nOptional:\n");
   fprintf(stderr, "  array_size_mb - Size of array in MB (default: 128)\n");
   fprintf(stderr, "\nExample: %s seq 256\n", prog_name);
@@ -40,6 +67,13 @@ int main(int argc, char **argv) {
     }
   }
 
+  const BenchEntry *bench = FindBenchmark(bench_type);
+  if (!bench) {
+    fprintf(stderr, "Error: Unknown benchmark type '%s'\n", bench_type);
+    PrintUsage(argv[0]);
+    return 1;
+  }
+
   size_t n = (size_mb * 1024 * 1024) / sizeof(uint64_t);
   printf("Allocating %zu MB array...\n", size_mb);
 
@@ -54,22 +88,9 @@ int main(int argc, char **argv) {
     array[i] = i;
   }
 
-  BenchResult result = {0};
-
-  if (strcmp(bench_type, "seq") == 0) {
-    result = BenchSequential(array, n);
-  } else if (strcmp(bench_type, "ran") == 0) {
-    result = BenchRandom(array, n);
-  } else if (strcmp(bench_type, "chase") == 0) {
-    result = BenchPointerChase(array, n);
-  } else {
-    fprintf(stderr, "Error: Unknown benchmark type '%s'\n", bench_type);
-    PrintUsage(argv[0]);
-    free(array);
-    return 1;
-  }
-
+  BenchResult result = bench->func(array, n);
   PrintResult(&result);
+
   free(array);
   return 0;
 }
