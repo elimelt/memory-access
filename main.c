@@ -17,6 +17,7 @@ static const BenchEntry kBenchmarks[] = {
     {"red_thread", "Reduction threaded (8 threads)", BenchReductionThread},
     {"red_ilp_simd", "Reduction ILP+SIMD combined", BenchReductionILPSimd},
     {"red_all", "Reduction all (threads+ILP+SIMD)", BenchReductionAll},
+    {"red_opt", "Reduction optimized (compiler free)", BenchReductionOpt},
 };
 
 static const size_t kNumBenchmarks = sizeof(kBenchmarks) / sizeof(kBenchmarks[0]);

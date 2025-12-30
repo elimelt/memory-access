@@ -41,5 +41,6 @@ BenchResult BenchReductionSimd(uint64_t *array, size_t n);
 BenchResult BenchReductionThread(uint64_t *array, size_t n);
 BenchResult BenchReductionILPSimd(uint64_t *array, size_t n);
 BenchResult BenchReductionAll(uint64_t *array, size_t n);
+BenchResult BenchReductionOpt(uint64_t *array, size_t n);
 
 #endif

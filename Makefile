@@ -1,6 +1,6 @@
 # Makefile
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -std=c11 -D_POSIX_C_SOURCE=199309L -march=native
+CFLAGS = -O3 -Wall -Wextra -std=c11 -D_POSIX_C_SOURCE=199309L -march=native
 LDFLAGS = -lrt -lpthread
 TARGET = bench
 

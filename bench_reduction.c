@@ -337,3 +337,25 @@ BenchResult BenchReductionAll(uint64_t *array, size_t n) {
 
   return MakeResult("Reduction All (8 threads + ILP + SIMD)", sum, n, ns);
 }
+
+static uint64_t SumOptimizable(const uint64_t *array, size_t n) {
+  uint64_t sum = 0;
+  for (size_t i = 0; i < n; i++) {
+    sum += array[i];
+  }
+  return sum;
+}
+
+BenchResult BenchReductionOpt(uint64_t *array, size_t n) {
+  struct timespec start, end;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
+  volatile uint64_t sum = SumOptimizable(array, n);
+  (void)sum;
+
+  clock_gettime(CLOCK_MONOTONIC, &end);
+  uint64_t ns =
+      (end.tv_sec - start.tv_sec) * 1000000000ULL + (end.tv_nsec - start.tv_nsec);
+
+  return MakeResult("Reduction Optimized (compiler free)", sum, n, ns);
+}
